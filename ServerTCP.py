@@ -6,6 +6,18 @@ client_connections = []
 def handle_client(connection, client_address):
     print(f"Connection established with {client_address}")
     client_connections.append(connection)
+    
+    size = len(client_connections)
+    print(size)
+    if size == 1:
+        connection.send(b'FIRST_TO_CONNECT')
+        print("Enviou Mensagem 1")
+    
+    while size < 2:
+        size = len(client_connections)
+        
+    connection.send(b'START_GAME')    
+    
     try:
         while True:
             data = connection.recv(1024)
