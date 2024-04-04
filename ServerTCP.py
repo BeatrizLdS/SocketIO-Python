@@ -1,5 +1,6 @@
 import socket
 import threading
+from models.procedure import Procedure
 
 class Server_TCP:
     def __init__(self, host, port):
@@ -42,9 +43,13 @@ class Server_TCP:
             while True:
                 data = connection.recv(1024)
                 if data:
-                    print(f"Received data: {data}")
+                    procedure = Procedure.decode(data)
+                    result_for_local_user, result_for_remote_user = procedure.execute()
                     for connec in self.client_connections:
-                        connec.send(data)
+                        if connec == connection:
+                            connec.send(result_for_local_user.encode('utf-8'))
+                        else:
+                            connec.send(result_for_remote_user.encode('utf-8'))
                             
                 else:
                     break
@@ -53,7 +58,7 @@ class Server_TCP:
         finally:
             self.client_connections.remove(connection)
             connection.close()
-     
+
 if __name__ == "__main__":   
     server = Server_TCP('0.0.0.0', 1100)
     server.register_with_broker()
